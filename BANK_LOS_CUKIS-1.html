@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>BANK LOS CUKIS</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 20px 15px; min-height: 100vh;
+  background: #080808; color: #d4af37;
+  font-family: Arial, sans-serif; text-align: center;
+}
+h1 { color:#f5d778; font-size:34px; letter-spacing:3px; text-shadow:0 0 15px #d4af37; }
+.subtitle { color:#c5a64b; font-size:13px; margin-bottom:35px; }
+.menu,.panel { max-width:500px; margin:25px auto; }
+.menu { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+.menu-card {
+  min-height:175px; background:#15120b; border:1px solid #d4af37;
+  border-radius:16px; color:#f5d778; padding:25px 10px;
+  font-size:20px; font-weight:bold; cursor:pointer; box-shadow:0 0 15px #d4af3722;
+}
+.menu-card span { display:block; font-size:42px; margin-bottom:15px; }
+.menu-card:active,.main-button:active { background:#493713; }
+.panel { background:#111; border:1px solid #b89635; border-radius:15px; padding:22px; box-shadow:0 0 15px #d4af3722; }
+.topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:25px; gap:10px; }
+.back { background:none; border:1px solid #d4af37; color:#f5d778; border-radius:9px; padding:9px 14px; font-size:19px; cursor:pointer; }
+.topbar h2 { color:#f5d778; font-size:21px; margin:0; }
+label { display:block; margin-bottom:12px; }
+.input-box { display:flex; align-items:center; border:1px solid #d4af37; border-radius:10px; padding:5px 12px; }
+.input-box span { font-size:22px; }
+input { width:100%; background:transparent; border:none; outline:none; color:#f5d778; padding:12px; font-size:20px; }
+input::-webkit-inner-spin-button,input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.stats { display:flex; justify-content:space-between; gap:10px; margin-top:25px; }
+.stats div { min-width:0; }
+.stats small { display:block; font-size:11px; margin-bottom:8px; }
+.stats strong { font-size:21px; overflow-wrap:anywhere; }
+.progress { background:#302817; height:17px; border-radius:20px; margin-top:25px; overflow:hidden; border:1px solid #b89635; }
+.bar { width:0%; height:100%; background:linear-gradient(90deg,#98751e,#ffe28a); transition:width .3s; }
+.percentage { margin-top:12px; font-size:23px; font-weight:bold; }
+.buttons { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px auto; max-width:500px; }
+.main-button { padding:17px 5px; background:linear-gradient(135deg,#f5d778,#a77b22); border:1px solid #ffe89c; border-radius:10px; color:#171006; font-size:16px; font-weight:bold; cursor:pointer; }
+.withdraw-button { grid-column:1/-1; background:#25170d; color:#f5d778; border:1px solid #d4af37; }
+.save-status { color:#b8a46b; font-size:12px; margin-top:20px; }
+.modal { display:none; position:fixed; inset:0; background:#000d; justify-content:center; align-items:center; padding:20px; z-index:10; }
+.modal-content { background:#17130a; border:2px solid #d4af37; border-radius:15px; padding:22px; width:100%; max-width:350px; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.modal-header h2 { color:#f5d778; font-size:20px; }
+.close { background:none; border:none; color:#f5d778; font-size:30px; cursor:pointer; }
+.amounts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; }
+.amounts button { background:#090909; border:1px solid #d4af37; color:#f5d778; border-radius:9px; padding:15px; font-size:19px; cursor:pointer; }
+.amounts button:active { background:#493713; }
+.modal-input { margin-top:20px; border:1px solid #d4af37; border-radius:10px; padding:5px 12px; }
+.action-button { width:100%; margin-top:15px; padding:14px; background:linear-gradient(135deg,#f5d778,#a77b22); color:#171006; font-size:16px; font-weight:bold; border:none; border-radius:9px; cursor:pointer; }
+#message { color:#f5d778; font-size:18px; line-height:1.5; }
+.notice { color:#e8c96b; font-size:13px; min-height:20px; margin-top:12px; }
+.hidden { display:none !important; }
+button:focus-visible,input:focus-visible { outline:2px solid #ffe89c; outline-offset:3px; }
+@media(max-width:360px) { h1 {font-size:28px;} .menu-card {font-size:17px;} .stats strong {font-size:17px;} }
+</style>
+</head>
+<body>
+<h1>BANK LOS CUKIS</h1>
+<p class="subtitle">TU DINERO, TU CONTROL 💛</p>
+
+<div id="home">
+  <div class="menu">
+    <button class="menu-card" onclick="openSection('bank')"><span>🏦</span>BANCO</button>
+    <button class="menu-card" onclick="openSection('savings')"><span>🐷</span>AHORROS</button>
+  </div>
+  <p class="save-status">✓ Guardado automático activado</p>
+</div>
+
+<div id="bank" class="hidden">
+  <div class="panel">
+    <div class="topbar"><button class="back" onclick="goHome()" aria-label="Volver">←</button><h2>🏦 MI BANCO</h2><div></div></div>
+    <small>DINERO DISPONIBLE</small>
+    <h1 id="bankBalance">$0</h1>
+    <p class="save-status">✓ Cuenta independiente</p>
+  </div>
+  <div class="buttons">
+    <button class="main-button" onclick="openTransaction('bank','coins')">🪙 MONEDAS</button>
+    <button class="main-button" onclick="openTransaction('bank','bills')">💵 BILLETES</button>
+    <button class="main-button withdraw-button" onclick="openTransaction('bank','withdraw')">💸 RETIRAR DINERO</button>
+  </div>
+</div>
+
+<div id="savings" class="hidden">
+  <div class="panel">
+    <div class="topbar"><button class="back" onclick="goHome()" aria-label="Volver">←</button><h2>🐷 MIS AHORROS</h2><div></div></div>
+    <label for="goal">¿Cuánto quieres ahorrar?</label>
+    <div class="input-box"><span>$</span><input id="goal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="10000"></div>
+    <div class="stats">
+      <div><small>AHORRADO</small><strong id="saved">$0</strong></div>
+      <div><small>META</small><strong id="goalDisplay">$0</strong></div>
+    </div>
+    <div class="progress" role="progressbar" aria-label="Progreso de ahorro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" id="bar"></div></div>
+    <div class="percentage" id="percentage">0%</div>
+    <p class="save-status">✓ Cuenta independiente</p>
+  </div>
+  <div class="buttons">
+    <button class="main-button" onclick="openTransaction('savings','coins')">🪙 MONEDAS</button>
+    <button class="main-button" onclick="openTransaction('savings','bills')">💵 BILLETES</button>
+    <button class="main-button withdraw-button" onclick="openTransaction('savings','withdraw')">💸 RETIRAR DINERO</button>
+  </div>
+</div>
+
+<div class="modal" id="transactionModal" role="dialog" aria-modal="true" aria-labelledby="transactionTitle">
+  <div class="modal-content">
+    <div class="modal-header"><h2 id="transactionTitle">OPERACIÓN</h2><button class="close" onclick="closeModal()" aria-label="Cerrar">×</button></div>
+    <div id="transactionContent"></div><p class="notice" id="transactionNotice" aria-live="polite"></p>
+  </div>
+</div>
+
+<div class="modal" id="celebration" role="dialog" aria-modal="true" aria-labelledby="celebrationTitle">
+  <div class="modal-content">
+    <div class="modal-header"><h2 id="celebrationTitle">🎉 FELICIDADES</h2><button class="close" onclick="closeCelebration()" aria-label="Cerrar">×</button></div>
+    <p id="message"></p>
+  </div>
+</div>
+
+<script>
+"use strict";
+const STORAGE_KEY = "bank_los_cukis_completo";
+const DEFAULT_DATA = { bank: 0, savings: 0, goal: 0, milestones: [] };
+let data = { ...DEFAULT_DATA };
+let currentAccount = "";
+let currentType = "";
+
+const money = n => "$" + Number(n).toLocaleString("es-MX", {
+  minimumFractionDigits: Number(n) % 1 ? 2 : 0,
+  maximumFractionDigits: 2
+});
+const roundMoney = n => Math.round((n + Number.EPSILON) * 100) / 100;
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch (error) { console.error("No se pudieron guardar los datos", error); }
+}
+function loadData() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const oldData = JSON.parse(stored);
+      data.bank = Math.max(0, Number(oldData.bank) || 0);
+      data.savings = Math.max(0, Number(oldData.savings) || 0);
+      data.goal = Math.max(0, Number(oldData.goal) || 0);
+      data.milestones = Array.isArray(oldData.milestones)
+        ? oldData.milestones.filter(n => [25, 50, 100].includes(n)) : [];
+    }
+  } catch (error) { console.error("Error recuperando datos", error); }
+  document.getElementById("goal").value = data.goal || "";
+  update();
+}
+function openSection(section) {
+  ["home", "bank", "savings"].forEach(id => document.getElementById(id).classList.add("hidden"));
+  document.getElementById(section).classList.remove("hidden");
+  update();
+}
+function goHome() {
+  saveData();
+  ["bank", "savings"].forEach(id => document.getElementById(id).classList.add("hidden"));
+  document.getElementById("home").classList.remove("hidden");
+}
+function openTransaction(account, type) {
+  currentAccount = account;
+  currentType = type;
+  const modal = document.getElementById("transactionModal");
+  const title = document.getElementById("transactionTitle");
+  const content = document.getElementById("transactionContent");
+  document.getElementById("transactionNotice").textContent = "";
+  const accountName = account === "bank" ? "BANCO" : "AHORROS";
+
+  if (type === "coins") {
+    title.textContent = "🪙 MONEDAS - " + accountName;
+    content.innerHTML = `<div class="amounts">
+      <button onclick="addMoney(0.5)">$0.50</button><button onclick="addMoney(1)">$1</button>
+      <button onclick="addMoney(2)">$2</button><button onclick="addMoney(5)">$5</button>
+      <button onclick="addMoney(10)">$10</button></div>`;
+  } else if (type === "bills") {
+    title.textContent = "💵 BILLETES - " + accountName;
+    content.innerHTML = `<div class="amounts">
+      <button onclick="addMoney(20)">$20</button><button onclick="addMoney(50)">$50</button>
+      <button onclick="addMoney(100)">$100</button><button onclick="addMoney(200)">$200</button>
+      <button onclick="addMoney(500)">$500</button><button onclick="addMoney(1000)">$1000</button></div>`;
+  } else {
+    title.textContent = "💸 RETIRAR - " + accountName;
+    content.innerHTML = `<p>Dinero disponible: <strong id="available"></strong></p>
+      <label for="withdrawAmount">¿Cuánto dinero quieres retirar?</label>
+      <div class="modal-input"><input id="withdrawAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Escribe la cantidad"></div>
+      <button class="action-button" onclick="withdrawMoney()">CONFIRMAR RETIRO</button>`;
+    document.getElementById("available").textContent = money(data[account]);
+  }
+  modal.style.display = "flex";
+}
+function addMoney(amount) {
+  data[currentAccount] = roundMoney(data[currentAccount] + amount);
+  saveData();
+  update();
+  document.getElementById("transactionNotice").textContent = "✓ Agregaste " + money(amount);
+}
+function withdrawMoney() {
+  const input = document.getElementById("withdrawAmount");
+  const amount = Number(input.value);
+  const notice = document.getElementById("transactionNotice");
+  if (!Number.isFinite(amount) || amount <= 0) {
+    notice.textContent = "Escribe una cantidad válida."; return;
+  }
+  if (amount > data[currentAccount]) {
+    notice.textContent = "No tienes suficiente dinero."; return;
+  }
+  data[currentAccount] = roundMoney(data[currentAccount] - amount);
+  saveData();
+  update();
+  document.getElementById("available").textContent = money(data[currentAccount]);
+  input.value = "";
+  notice.textContent = "✓ Retiraste " + money(amount) + " correctamente.";
+}
+function closeModal() { document.getElementById("transactionModal").style.display = "none"; }
+function closeCelebration() { document.getElementById("celebration").style.display = "none"; }
+
+function update() {
+  document.getElementById("bankBalance").textContent = money(data.bank);
+  document.getElementById("saved").textContent = money(data.savings);
+  document.getElementById("goalDisplay").textContent = money(data.goal);
+  const percent = data.goal > 0 ? (data.savings / data.goal) * 100 : 0;
+  const visualPercent = Math.min(percent, 100);
+  document.getElementById("bar").style.width = visualPercent + "%";
+  document.getElementById("percentage").textContent = (Math.round(visualPercent * 10) / 10) + "%";
+  document.querySelector(".progress").setAttribute("aria-valuenow", String(Math.round(visualPercent)));
+  checkMilestones(percent);
+  saveData();
+}
+function checkMilestones(percent) {
+  const milestones = [
+    { value:25, message:"¡Felicidades! Ya alcanzaste el 25% de tu meta." },
+    { value:50, message:"¡Felicidades! Ya alcanzaste el 50% de tu meta." },
+    { value:100, message:"¡INCREÍBLE! ¡Llegaste al 100% de tu meta!" }
+  ];
+  for (const milestone of milestones) {
+    if (data.goal > 0 && percent >= milestone.value && !data.milestones.includes(milestone.value)) {
+      data.milestones.push(milestone.value);
+      saveData();
+      document.getElementById("message").textContent = milestone.message;
+      document.getElementById("celebration").style.display = "flex";
+      break;
+    }
+  }
+}
+document.getElementById("goal").addEventListener("input", function() {
+  data.goal = Math.max(0, Number(this.value) || 0);
+  const percent = data.goal > 0 ? (data.savings / data.goal) * 100 : 0;
+  data.milestones = [25, 50, 100].filter(n => percent >= n);
+  saveData();
+  update();
+});
+window.addEventListener("pagehide", saveData);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") saveData();
+});
+document.getElementById("transactionModal").addEventListener("click", event => {
+  if (event.target.id === "transactionModal") closeModal();
+});
+document.getElementById("celebration").addEventListener("click", event => {
+  if (event.target.id === "celebration") closeCelebration();
+});
+loadData();
+</script>
+</body>
+</html>
